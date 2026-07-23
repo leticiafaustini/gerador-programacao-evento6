@@ -352,6 +352,7 @@
   }
   .cta-banner p{ margin:0; font-size:14px; color:var(--parchment-dim); line-height:1.55; max-width:48ch; }
   .cta-banner .btn{ align-self:flex-start; }
+  .cta-actions{ display:flex; gap:12px; flex-wrap:wrap; }
 
   .editorial-list{ display:flex; flex-direction:column; gap:0; border:1px solid var(--line); border-radius:12px; overflow:hidden; background: var(--ink-soft); }
   .editorial-item{
@@ -470,6 +471,26 @@
           <option value="Outro">Outro</option>
         </select>
       </div>
+      <div class="field">
+        <label for="lead-whatsapp">Número de WhatsApp</label>
+        <input id="lead-whatsapp" type="tel" placeholder="(00) 00000-0000" required>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="lead-participantes">Quantas pessoas irão comparecer?</label>
+          <input id="lead-participantes" type="number" min="1" placeholder="Ex: 150" required>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="lead-hora-inicio">Horário de início do evento</label>
+          <input id="lead-hora-inicio" type="time" required>
+        </div>
+        <div class="field">
+          <label for="lead-hora-fim">Horário de término do evento</label>
+          <input id="lead-hora-fim" type="time" required>
+        </div>
+      </div>
       <div class="actions">
         <button type="button" class="btn btn-ghost" onclick="goTo('hero')">Voltar</button>
         <button type="submit" class="btn btn-primary">Continuar →</button>
@@ -490,8 +511,8 @@
         <input id="ev-tema" type="text" placeholder="Ex: Renovo — um novo começo em Cristo" required>
       </div>
       <div class="field">
-        <label for="ev-versiculo">Versículo-base (opcional)</label>
-        <input id="ev-versiculo" type="text" placeholder="Ex: Isaías 43:19">
+        <label for="ev-versiculo">Versículo-base</label>
+        <input id="ev-versiculo" type="text" placeholder="Ex: Isaías 43:19" required>
       </div>
       <div class="row2">
         <div class="field">
@@ -581,7 +602,10 @@
     <div class="cta-banner">
       <h4>Já pensou nas inscrições desse evento?</h4>
       <p>Organize a lista de participantes, cobrança e check-in do dia com a e-inscrição — leva menos de 5 minutos para configurar.</p>
-      <a class="btn btn-primary" href="https://e-inscricao.com/cadastro" target="_blank" rel="noopener">Criar inscrições para este evento →</a>
+      <div class="cta-actions">
+        <a class="btn btn-primary" href="https://e-inscricao.com/cadastro" target="_blank" rel="noopener">Criar inscrições para este evento →</a>
+        <a class="btn btn-ghost" href="planner-marketing.xlsx" download="Planner-de-Marketing-e-inscricao.xlsx">Baixar planner de marketing</a>
+      </div>
     </div>
 
     <div class="result-actions">
@@ -614,7 +638,8 @@ async function enviarLeadParaHubspot(lead){
           { name: 'firstname', value: lead.nome },
           { name: 'email', value: lead.email },
           { name: 'company', value: lead.igreja },
-          { name: 'jobtitle', value: lead.cargo }
+          { name: 'jobtitle', value: lead.cargo },
+          { name: 'phone', value: lead.whatsapp }
         ],
         context: {
           pageUri: window.location.href,
@@ -641,7 +666,11 @@ function handleLeadSubmit(event){
     nome: document.getElementById('lead-nome').value.trim(),
     email: document.getElementById('lead-email').value.trim(),
     igreja: document.getElementById('lead-igreja').value.trim(),
-    cargo: document.getElementById('lead-cargo').value
+    cargo: document.getElementById('lead-cargo').value,
+    whatsapp: document.getElementById('lead-whatsapp').value.trim(),
+    participantes: document.getElementById('lead-participantes').value.trim(),
+    horaInicio: document.getElementById('lead-hora-inicio').value,
+    horaFim: document.getElementById('lead-hora-fim').value
   };
   enviarLeadParaHubspot(leadAtual);
   goTo('event');
@@ -685,7 +714,13 @@ async function gerarProgramacao(){
     const response = await fetch('/api/gerar-programacao', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tema, versiculo, publico, tipo, duracao, formato, lead: leadAtual })
+      body: JSON.stringify({
+        tema, versiculo, publico, tipo, duracao, formato,
+        lead: leadAtual,
+        participantes: leadAtual ? leadAtual.participantes : '',
+        horaInicio: leadAtual ? leadAtual.horaInicio : '',
+        horaFim: leadAtual ? leadAtual.horaFim : ''
+      })
     });
 
     if(!response.ok){
