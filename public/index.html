@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador de Programação de Evento — e-inscrição</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rethink+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink-navy: #221731;
+    --ink-soft: #34204F;
+    --ink-softer: #402963;
+    --gold-candle: #35D6B8;
+    --gold-dim: #1FA890;
+    --parchment: #EDE6F5;
+    --parchment-dim: #B8A9CE;
+    --coral-ember: #8B5FBF;
+    --sage: #24B39B;
+    --line: rgba(237,230,245,0.12);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--ink-navy);
+    color: var(--parchment);
+    font-family:'Rethink Sans', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+    position:relative;
+  }
+  .eyebrow{
+    font-family:'Rethink Sans', monospace; letter-spacing:0.03em;
+    font-size:12px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color: var(--gold-candle);
+    margin-bottom:16px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .eyebrow::before{
+    content:'';
+    width:6px;height:6px;border-radius:50%;
+    background: var(--gold-candle);
+    box-shadow: 0 0 8px 2px rgba(53,214,184,0.6);
+  }
+  h1{
+    font-family:'Rethink Sans', sans-serif;
+    font-weight:600;
+    font-size: clamp(32px, 5vw, 46px);
+    line-height:1.1;
+    margin:0 0 16px;
+    letter-spacing:-0.01em;
+  }
+  h1 em{
+    font-style:italic;
+    color: var(--gold-candle);
+    font-weight:500;
+  }
+  .lede{
+    font-size:17px;
+    line-height:1.6;
+    color: var(--parchment-dim);
+    max-width:52ch;
+    margin:0 0 36px;
+  }
+  .step{ display:none; animation: fade .5s ease; }
+  .step.active{ display:block; }
+  @keyframes fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  .btn{
+    font-family:'Rethink Sans', sans-serif;
+    font-weight:600;
+    font-size:15px;
+    border:none;
+    border-radius:8px;
+    padding:14px 26px;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:focus-visible{ outline:2px solid var(--gold-candle); outline-offset:3px; }
+  .btn-primary{
+    background: var(--gold-candle);
+    color: var(--ink-navy);
+  }
+  .btn-primary:hover{ transform: translateY(-1px); box-shadow: 0 8px 20px rgba(53,214,184,0.25); }
+  .btn-primary:disabled{ opacity:0.5; cursor:not-allowed; transform:none; box-shadow:none; }
+  .btn-ghost{
+    background:transparent;
+    color: var(--parchment-dim);
+    border:1px solid var(--line);
+  }
+  .btn-ghost:hover{ color:var(--parchment); border-color: var(--parchment-dim); }
+
+  .hero-visual{
+    margin: 8px 0 40px;
+    padding: 22px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    background: linear-gradient(180deg, var(--ink-soft), var(--ink-navy));
+    position:relative;
+    overflow:hidden;
+  }
+  .wick{
+    position:relative;
+    padding-left:26px;
+  }
+  .wick::before{
+    content:'';
+    position:absolute;
+    left:5px; top:6px; bottom:6px;
+    width:2px;
+    background: linear-gradient(180deg, var(--gold-candle), var(--coral-ember) 60%, var(--sage));
+    opacity:0.6;
+  }
+  .wick-item{ position:relative; padding:9px 0; }
+  .wick-item::before{
+    content:'';
+    position:absolute; left:-26px; top:14px;
+    width:9px; height:9px; border-radius:50%;
+    background: var(--gold-candle);
+    box-shadow:0 0 8px 2px rgba(53,214,184,0.5);
+  }
+  .wick-item .t{ font-family:'Rethink Sans', monospace; letter-spacing:0.03em; font-size:11px; color:var(--gold-candle); }
+  .wick-item .l{ font-size:14px; color:var(--parchment-dim); }
+
+  form{ display:flex; flex-direction:column; gap:18px; }
+  .field label{
+    display:block;
+    font-size:13px;
+    font-weight:600;
+    color: var(--parchment-dim);
+    margin-bottom:8px;
+    letter-spacing:0.01em;
+  }
+  .field input, .field select{
+    width:100%;
+    background: var(--ink-soft);
+    border:1px solid var(--line);
+    color: var(--parchment);
+    font-family:'Rethink Sans', sans-serif;
+    font-size:15px;
+    padding:13px 14px;
+    border-radius:8px;
+    transition: border-color .15s ease;
+  }
+  .field input:focus, .field select:focus{
+    outline:none;
+    border-color: var(--gold-candle);
+  }
+  .field input::placeholder{ color: rgba(237,230,245,0.35); }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  @media (max-width:520px){ .row2{ grid-template-columns:1fr; } }
+
+  .actions{ display:flex; gap:12px; margin-top:8px; align-items:center; }
+  .fineprint{
+    font-size:12px;
+    color: rgba(237,230,245,0.45);
+    margin-top:18px;
+    line-height:1.5;
+  }
+
+  .loading-wrap{ text-align:center; padding:60px 0; }
+  .flame{
+    width:14px;height:20px;
+    margin:0 auto 24px;
+    background: radial-gradient(ellipse at 50% 30%, var(--gold-candle), var(--coral-ember) 70%, transparent);
+    border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
+    animation: flicker 1.1s ease-in-out infinite alternate;
+  }
+  @keyframes flicker{
+    0%{ transform: scaleY(1) scaleX(1) rotate(-1deg); }
+    100%{ transform: scaleY(1.12) scaleX(0.95) rotate(1deg); }
+  }
+  .loading-text{ font-family:'Rethink Sans', sans-serif; font-weight:700; font-size:19px; color:var(--parchment-dim); }
+
+  .result-header{ margin-bottom:28px; }
+  .result-header h2{
+    font-family:'Rethink Sans', sans-serif;
+    font-weight:700;
+    font-size:28px;
+    margin:0 0 6px;
+  }
+  .result-meta{ font-size:14px; color: var(--parchment-dim); }
+  .result-org{ font-size:13px; color: var(--gold-candle); margin-top:6px; font-weight:600; }
+
+  .program-card{
+    border:1px solid var(--line);
+    border-radius:14px;
+    background: var(--ink-soft);
+    padding:8px 28px 28px;
+  }
+  .timeline{ position:relative; padding-left:8px; }
+  .timeline::before{
+    content:'';
+    position:absolute; left:56px; top:8px; bottom:8px;
+    width:2px;
+    background: linear-gradient(180deg, var(--gold-candle), var(--coral-ember) 45%, var(--sage) 80%);
+    opacity:0.55;
+  }
+  .block{
+    display:grid;
+    grid-template-columns:48px 1fr;
+    gap:20px;
+    padding:20px 0;
+    border-bottom:1px solid var(--line);
+    position:relative;
+  }
+  .block:last-child{ border-bottom:none; }
+  .block .time{
+    font-family:'Rethink Sans', monospace; letter-spacing:0.03em;
+    font-size:12px;
+    color: var(--gold-candle);
+    padding-top:3px;
+    text-align:right;
+  }
+  .block .dot{
+    position:absolute; left:52px; top:26px;
+    width:10px;height:10px;border-radius:50%;
+    background: var(--gold-candle);
+    box-shadow:0 0 0 4px var(--ink-soft);
+  }
+  .block .content{ padding-left:20px; }
+  .tag{
+    display:inline-block;
+    font-family:'Rethink Sans', monospace; letter-spacing:0.03em;
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:3px 9px;
+    border-radius:20px;
+    margin-bottom:8px;
+  }
+  .tag-louvor{ background:rgba(53,214,184,0.15); color:var(--gold-candle); }
+  .tag-mensagem{ background:rgba(139,95,191,0.18); color:var(--coral-ember); }
+  .tag-oracao{ background:rgba(36,179,155,0.18); color:var(--sage); }
+  .tag-dinamica{ background:rgba(237,230,245,0.1); color:var(--parchment-dim); }
+  .tag-intervalo{ background:rgba(237,230,245,0.06); color:var(--parchment-dim); }
+  .tag-abertura, .tag-encerramento{ background:rgba(53,214,184,0.1); color:var(--gold-dim); }
+  .block-title{ font-family:'Rethink Sans', sans-serif; font-weight:700; font-size:17px; margin:0 0 4px; }
+  .block-desc{ font-size:14px; color:var(--parchment-dim); line-height:1.5; margin:0; }
+
+  .result-actions{ display:flex; gap:12px; margin-top:28px; flex-wrap:wrap; }
+
+  .block-extra{ margin-top:10px; }
+  .music-suggestion{
+    display:flex; align-items:flex-start; gap:8px;
+    font-size:13px; color: var(--parchment-dim);
+    background: rgba(53,214,184,0.08);
+    border-left:2px solid var(--gold-candle);
+    padding:8px 12px;
+    border-radius:0 6px 6px 0;
+    margin-top:10px;
+  }
+  .music-suggestion .icon{ color: var(--gold-candle); flex-shrink:0; }
+  .checklist{ list-style:none; margin:10px 0 0; padding:0; display:flex; flex-direction:column; gap:5px; }
+  .checklist li{
+    font-size:13px; color: var(--parchment-dim);
+    padding-left:18px; position:relative;
+  }
+  .checklist li::before{
+    content:'✓';
+    position:absolute; left:0; top:0;
+    color: var(--gold-dim);
+    font-weight:700;
+    font-size:12px;
+  }
+
+  .section-heading{
+    font-size:22px; font-weight:700; margin: 44px 0 6px;
+  }
+  .section-sub{ font-size:14px; color: var(--parchment-dim); margin:0 0 20px; }
+
+  .kit-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  @media (max-width:600px){ .kit-grid{ grid-template-columns:1fr; } }
+  .kit-card{
+    border:1px solid var(--line);
+    border-radius:12px;
+    background: var(--ink-soft);
+    padding:20px;
+    display:flex; flex-direction:column; gap:12px;
+  }
+  .kit-card h4{
+    margin:0; font-size:13px; text-transform:uppercase; letter-spacing:0.06em;
+    color: var(--gold-candle); font-weight:700;
+  }
+  .kit-card p{ margin:0; font-size:14px; line-height:1.55; color: var(--parchment); white-space:pre-wrap; }
+  .kit-copy-btn{
+    align-self:flex-start;
+    background:transparent;
+    border:1px solid var(--line);
+    color: var(--parchment-dim);
+    font-family:'Rethink Sans', sans-serif;
+    font-size:12px; font-weight:600;
+    padding:7px 12px; border-radius:6px;
+    cursor:pointer;
+  }
+  .kit-copy-btn:hover{ border-color: var(--gold-candle); color: var(--gold-candle); }
+
+  .calendar-grid{ display:flex; flex-direction:column; gap:12px; }
+  .calendar-item{
+    display:grid;
+    grid-template-columns:120px 1fr;
+    gap:18px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    background: var(--ink-soft);
+    padding:16px 20px;
+    align-items:start;
+  }
+  @media (max-width:560px){ .calendar-item{ grid-template-columns:1fr; gap:8px; } }
+  .calendar-when{
+    font-family:'Rethink Sans', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    color: var(--gold-candle);
+  }
+  .calendar-body{ display:flex; flex-direction:column; gap:4px; }
+  .calendar-meta{ display:flex; gap:8px; flex-wrap:wrap; }
+  .calendar-platform, .calendar-format{
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:0.03em;
+    padding:3px 9px;
+    border-radius:20px;
+  }
+  .calendar-platform{ background: rgba(53,214,184,0.15); color: var(--gold-candle); }
+  .calendar-format{ background: rgba(139,95,191,0.18); color: var(--coral-ember); }
+  .calendar-idea{ font-size:14px; color: var(--parchment); margin:4px 0 0; line-height:1.5; }
+
+  .cta-banner{
+    margin-top:44px;
+    padding:28px 26px;
+    border-radius:14px;
+    background: linear-gradient(135deg, var(--ink-softer), var(--ink-soft));
+    border:1px solid rgba(53,214,184,0.25);
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .cta-banner h4{
+    font-size:19px; font-weight:700; margin:0;
+  }
+  .cta-banner p{ margin:0; font-size:14px; color:var(--parchment-dim); line-height:1.55; max-width:48ch; }
+  .cta-banner .btn{ align-self:flex-start; }
+
+  .editorial-list{ display:flex; flex-direction:column; gap:0; border:1px solid var(--line); border-radius:12px; overflow:hidden; background: var(--ink-soft); }
+  .editorial-item{
+    display:grid;
+    grid-template-columns:110px 150px 1fr;
+    gap:16px;
+    padding:16px 20px;
+    border-bottom:1px solid var(--line);
+    align-items:start;
+  }
+  .editorial-item:last-child{ border-bottom:none; }
+  @media (max-width:600px){
+    .editorial-item{ grid-template-columns:1fr; gap:6px; }
+  }
+  .editorial-quando{
+    font-family:'Rethink Sans', sans-serif;
+    font-weight:700;
+    font-size:13px;
+    color: var(--gold-candle);
+  }
+  .editorial-meta{ display:flex; flex-direction:column; gap:4px; }
+  .editorial-plataforma{ font-size:12px; color: var(--parchment-dim); }
+  .editorial-formato{
+    display:inline-block;
+    font-size:11px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color: var(--coral-ember);
+    background: rgba(139,95,191,0.15);
+    padding:2px 8px;
+    border-radius:20px;
+    width:fit-content;
+  }
+  .editorial-ideia{ font-size:14px; color: var(--parchment); line-height:1.5; }
+
+  .error-box{
+    border:1px solid rgba(139,95,191,0.4);
+    background: rgba(139,95,191,0.08);
+    color: var(--parchment);
+    padding:16px 18px;
+    border-radius:10px;
+    font-size:14px;
+    margin-top:18px;
+  }
+
+  @media print{
+    body{ background:#fff; color:#111; }
+    .step:not(.active){ display:none; }
+    .btn, .fineprint, .eyebrow::before, .kit-copy-btn{ display:none !important; }
+    .program-card{ border-color:#ddd; background:#fff; }
+    .timeline::before{ background:#ccc; }
+    .kit-card, .cta-banner, .editorial-list{ border-color:#ddd; background:#fff; }
+    .editorial-item{ border-bottom-color:#eee; }
+    .editorial-formato{ background:#f0f0f0; color:#333; }
+    .calendar-item{ border-color:#ddd; background:#fff; }
+    .music-suggestion{ background:#f4f4f4; border-left-color:#999; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- STEP 1: HERO -->
+  <section class="step active" id="step-hero">
+    <div class="eyebrow">Ferramenta gratuita · e-inscrição</div>
+    <h1>Sua programação de evento, <em>pronta em minutos</em></h1>
+    <p class="lede">Informe o tema, o público e a duração do seu evento cristão — louvor, mensagem, dinâmicas e momentos de oração são organizados automaticamente, com tempo sugerido para cada bloco.</p>
+
+    <div class="hero-visual">
+      <div class="wick">
+        <div class="wick-item"><div class="t">19:00 — 19:20</div><div class="l">Abertura e boas-vindas</div></div>
+        <div class="wick-item"><div class="t">19:20 — 19:50</div><div class="l">Momento de louvor</div></div>
+        <div class="wick-item"><div class="t">19:50 — 20:00</div><div class="l">Oração de consagração</div></div>
+        <div class="wick-item"><div class="t">20:00 — 20:40</div><div class="l">Mensagem central</div></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" onclick="goTo('lead')">Criar minha programação →</button>
+    </div>
+  </section>
+
+  <!-- STEP 2: LEAD CAPTURE -->
+  <section class="step" id="step-lead">
+    <div class="eyebrow">Passo 1 de 2</div>
+    <h1>Antes de começar, <em>quem é você?</em></h1>
+    <p class="lede">Usamos esses dados só para enviar sua programação e novidades da e-inscrição para organizadores de eventos.</p>
+
+    <form onsubmit="handleLeadSubmit(event)">
+      <div class="field">
+        <label for="lead-nome">Nome completo</label>
+        <input id="lead-nome" type="text" placeholder="Como podemos te chamar" required>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="lead-email">E-mail</label>
+          <input id="lead-email" type="email" placeholder="voce@igreja.com" required>
+        </div>
+        <div class="field">
+          <label for="lead-igreja">Igreja / ministério</label>
+          <input id="lead-igreja" type="text" placeholder="Nome da igreja ou ministério" required>
+        </div>
+      </div>
+      <div class="field">
+        <label for="lead-cargo">Seu papel na organização</label>
+        <select id="lead-cargo">
+          <option value="Pastor(a) / Líder principal">Pastor(a) / Líder principal</option>
+          <option value="Coordenador(a) de eventos">Coordenador(a) de eventos</option>
+          <option value="Líder de ministério">Líder de ministério</option>
+          <option value="Voluntário(a) de organização">Voluntário(a) de organização</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn-ghost" onclick="goTo('hero')">Voltar</button>
+        <button type="submit" class="btn btn-primary">Continuar →</button>
+      </div>
+      <p class="fineprint">Em produção, este formulário envia os dados diretamente para o HubSpot antes de liberar o resultado, permitindo captação e qualificação do lead.</p>
+    </form>
+  </section>
+
+  <!-- STEP 3: EVENT DETAILS -->
+  <section class="step" id="step-event">
+    <div class="eyebrow">Passo 2 de 2</div>
+    <h1>Conte sobre <em>o seu evento</em></h1>
+    <p class="lede">Quanto mais específico, mais personalizada fica a programação gerada.</p>
+
+    <form onsubmit="event.preventDefault(); gerarProgramacao();">
+      <div class="field">
+        <label for="ev-tema">Tema do evento</label>
+        <input id="ev-tema" type="text" placeholder="Ex: Renovo — um novo começo em Cristo" required>
+      </div>
+      <div class="field">
+        <label for="ev-versiculo">Versículo-base (opcional)</label>
+        <input id="ev-versiculo" type="text" placeholder="Ex: Isaías 43:19">
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="ev-publico">Público</label>
+          <select id="ev-publico">
+            <option>Jovens</option>
+            <option>Casais</option>
+            <option>Mulheres</option>
+            <option>Homens</option>
+            <option>Líderes / obreiros</option>
+            <option>Público geral / família</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="ev-tipo">Tipo de evento</label>
+          <select id="ev-tipo">
+            <option>Culto especial</option>
+            <option>Conferência</option>
+            <option>Retiro</option>
+            <option>Congresso</option>
+            <option>Vigília</option>
+            <option>Acampamento</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="ev-duracao">Duração total</label>
+          <select id="ev-duracao">
+            <option value="1 hora e 30 minutos">1h30</option>
+            <option value="2 horas" selected>2 horas</option>
+            <option value="3 horas">3 horas</option>
+            <option value="4 horas">4 horas</option>
+            <option value="1 dia inteiro (8 horas, com intervalos)">Dia inteiro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="ev-formato">Formato</label>
+          <select id="ev-formato">
+            <option>Presencial</option>
+            <option>Online</option>
+            <option>Híbrido</option>
+          </select>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn-ghost" onclick="goTo('lead')">Voltar</button>
+        <button type="submit" class="btn btn-primary" id="btn-gerar">Gerar programação com IA →</button>
+      </div>
+    </form>
+    <div id="event-error"></div>
+  </section>
+
+  <!-- STEP 4: LOADING -->
+  <section class="step" id="step-loading">
+    <div class="loading-wrap">
+      <div class="flame"></div>
+      <div class="loading-text">Montando a programação do seu evento...</div>
+    </div>
+  </section>
+
+  <!-- STEP 5: RESULT -->
+  <section class="step" id="step-result">
+    <div class="result-header">
+      <div class="eyebrow">Programação gerada</div>
+      <h2 id="result-title">—</h2>
+      <div class="result-meta" id="result-meta">—</div>
+      <div class="result-org" id="result-org"></div>
+    </div>
+    <div class="program-card">
+      <div class="timeline" id="timeline"></div>
+    </div>
+
+    <h3 class="section-heading">Calendário editorial</h3>
+    <p class="section-sub">O que publicar antes, durante e depois do evento para gerar engajamento.</p>
+    <div class="calendar-grid" id="calendar-grid"></div>
+
+    <h3 class="section-heading">Kit de divulgação</h3>
+    <p class="section-sub">Textos prontos, gerados com o tema do seu evento — é só copiar e usar.</p>
+    <div class="kit-grid" id="kit-grid"></div>
+
+    <h3 class="section-heading">Calendário editorial</h3>
+    <p class="section-sub">O que publicar em cada momento até o dia do evento.</p>
+    <div class="editorial-list" id="editorial-list"></div>
+
+    <!-- Substitua o href abaixo pela URL real de cadastro/criação de evento da e-inscrição -->
+    <div class="cta-banner">
+      <h4>Já pensou nas inscrições desse evento?</h4>
+      <p>Organize a lista de participantes, cobrança e check-in do dia com a e-inscrição — leva menos de 5 minutos para configurar.</p>
+      <a class="btn btn-primary" href="https://e-inscricao.com/cadastro" target="_blank" rel="noopener">Criar inscrições para este evento →</a>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn btn-primary" onclick="window.print()">Baixar / imprimir programação</button>
+      <button class="btn btn-ghost" onclick="goTo('event')">Gerar outra versão</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+// ====== CONFIGURAÇÃO DO HUBSPOT ======
+// Substitua pelos valores reais da sua conta HubSpot:
+// Portal ID: fica em Configurações > Conta > ID da conta
+// Form GUID: abra o formulário criado no HubSpot, o GUID está na URL do editor
+const HUBSPOT_PORTAL_ID = 'SEU_PORTAL_ID';
+const HUBSPOT_FORM_GUID = 'SEU_FORM_GUID';
+
+async function enviarLeadParaHubspot(lead){
+  if(HUBSPOT_PORTAL_ID.startsWith('SEU_') || HUBSPOT_FORM_GUID.startsWith('SEU_')){
+    console.warn('[HubSpot] Portal ID / Form GUID ainda não configurados em index.html — envio pulado. A ferramenta continua funcionando normalmente.');
+    return;
+  }
+  try{
+    await fetch(`https://api.hsforms.com/submissions/v3/integration/submit/${HUBSPOT_PORTAL_ID}/${HUBSPOT_FORM_GUID}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: [
+          { name: 'firstname', value: lead.nome },
+          { name: 'email', value: lead.email },
+          { name: 'company', value: lead.igreja },
+          { name: 'jobtitle', value: lead.cargo }
+        ],
+        context: {
+          pageUri: window.location.href,
+          pageName: 'Gerador de Programação de Evento — e-inscrição'
+        }
+      })
+    });
+  } catch(err){
+    console.error('[HubSpot] Erro ao enviar lead:', err);
+  }
+}
+
+function goTo(step){
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-' + step).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+let leadAtual = null;
+
+function handleLeadSubmit(event){
+  event.preventDefault();
+  leadAtual = {
+    nome: document.getElementById('lead-nome').value.trim(),
+    email: document.getElementById('lead-email').value.trim(),
+    igreja: document.getElementById('lead-igreja').value.trim(),
+    cargo: document.getElementById('lead-cargo').value
+  };
+  enviarLeadParaHubspot(leadAtual);
+  goTo('event');
+}
+
+const tagClassMap = {
+  'louvor':'tag-louvor',
+  'mensagem':'tag-mensagem',
+  'oracao':'tag-oracao',
+  'dinamica':'tag-dinamica',
+  'intervalo':'tag-intervalo',
+  'abertura':'tag-abertura',
+  'encerramento':'tag-encerramento'
+};
+const tagLabelMap = {
+  'louvor':'Louvor',
+  'mensagem':'Mensagem',
+  'oracao':'Oração',
+  'dinamica':'Dinâmica',
+  'intervalo':'Intervalo',
+  'abertura':'Abertura',
+  'encerramento':'Encerramento'
+};
+
+async function gerarProgramacao(){
+  const btn = document.getElementById('btn-gerar');
+  const errorBox = document.getElementById('event-error');
+  errorBox.innerHTML = '';
+  btn.disabled = true;
+
+  const tema = document.getElementById('ev-tema').value.trim();
+  const versiculo = document.getElementById('ev-versiculo').value.trim();
+  const publico = document.getElementById('ev-publico').value;
+  const tipo = document.getElementById('ev-tipo').value;
+  const duracao = document.getElementById('ev-duracao').value;
+  const formato = document.getElementById('ev-formato').value;
+
+  goTo('loading');
+
+  try{
+    const response = await fetch('/api/gerar-programacao', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tema, versiculo, publico, tipo, duracao, formato, lead: leadAtual })
+    });
+
+    if(!response.ok){
+      const errBody = await response.json().catch(() => ({}));
+      throw new Error(errBody.error || 'Falha na resposta do servidor');
+    }
+    const parsed = await response.json();
+
+    renderResult(parsed, { tema, publico, tipo, duracao, formato });
+    goTo('result');
+  } catch(err){
+    console.error(err);
+    goTo('event');
+    errorBox.innerHTML = '<div class="error-box">Não conseguimos gerar a programação agora. Verifique se o servidor está rodando e se a chave de API foi configurada no arquivo .env, depois tente novamente.</div>';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function renderResult(parsed, ctx){
+  document.getElementById('result-title').textContent = parsed.titulo_evento || ctx.tema;
+  document.getElementById('result-meta').textContent =
+    `${ctx.tipo} · ${ctx.publico} · ${ctx.duracao} · ${ctx.formato}`;
+
+  const orgEl = document.getElementById('result-org');
+  orgEl.textContent = (leadAtual && leadAtual.igreja) ? `Preparado para ${leadAtual.igreja}` : '';
+
+  const timeline = document.getElementById('timeline');
+  timeline.innerHTML = '';
+
+  (parsed.blocos || []).forEach(b => {
+    const tagClass = tagClassMap[b.tipo] || 'tag-dinamica';
+    const tagLabel = tagLabelMap[b.tipo] || b.tipo;
+
+    const musicHtml = (b.tipo === 'louvor' && b.sugestao_musical)
+      ? `<div class="music-suggestion"><span class="icon">♪</span><span>${b.sugestao_musical}</span></div>`
+      : '';
+
+    const checklistHtml = (Array.isArray(b.checklist) && b.checklist.length)
+      ? `<ul class="checklist">${b.checklist.map(item => `<li>${item}</li>`).join('')}</ul>`
+      : '';
+
+    const el = document.createElement('div');
+    el.className = 'block';
+    el.innerHTML = `
+      <div class="time">${b.inicio}<br>${b.fim}</div>
+      <div class="dot"></div>
+      <div class="content">
+        <span class="tag ${tagClass}">${tagLabel}</span>
+        <p class="block-title">${b.titulo}</p>
+        <p class="block-desc">${b.descricao}</p>
+        <div class="block-extra">${musicHtml}${checklistHtml}</div>
+      </div>
+    `;
+    timeline.appendChild(el);
+  });
+
+  const calendarGrid = document.getElementById('calendar-grid');
+  calendarGrid.innerHTML = '';
+  (parsed.calendario_editorial || []).forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'calendar-item';
+    el.innerHTML = `
+      <div class="calendar-when">${item.quando || ''}</div>
+      <div class="calendar-body">
+        <div class="calendar-meta">
+          <span class="calendar-platform">${item.plataforma || ''}</span>
+          <span class="calendar-format">${item.formato || ''}</span>
+        </div>
+        <p class="calendar-idea">${item.ideia || ''}</p>
+      </div>
+    `;
+    calendarGrid.appendChild(el);
+  });
+
+  const kit = parsed.kit_divulgacao || {};
+  const kitGrid = document.getElementById('kit-grid');
+  kitGrid.innerHTML = '';
+  const kitItems = [
+    { titulo: 'Post para Instagram', texto: kit.post_instagram },
+    { titulo: 'Convite para WhatsApp', texto: kit.convite_whatsapp }
+  ];
+  kitItems.forEach((item, idx) => {
+    if(!item.texto) return;
+    const card = document.createElement('div');
+    card.className = 'kit-card';
+    const textId = `kit-text-${idx}`;
+    card.innerHTML = `
+      <h4>${item.titulo}</h4>
+      <p id="${textId}">${item.texto}</p>
+      <button class="kit-copy-btn" onclick="copiarKit('${textId}', this)">Copiar texto</button>
+    `;
+    kitGrid.appendChild(card);
+  });
+
+  const editorialList = document.getElementById('editorial-list');
+  editorialList.innerHTML = '';
+  (parsed.calendario_editorial || []).forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'editorial-item';
+    el.innerHTML = `
+      <div class="editorial-quando">${item.quando}</div>
+      <div class="editorial-meta">
+        <span class="editorial-formato">${item.formato}</span>
+        <span class="editorial-plataforma">${item.plataforma}</span>
+      </div>
+      <div class="editorial-ideia">${item.ideia}</div>
+    `;
+    editorialList.appendChild(el);
+  });
+}
+
+function copiarKit(elementId, btn){
+  const text = document.getElementById(elementId).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const original = btn.textContent;
+    btn.textContent = 'Copiado ✓';
+    setTimeout(() => { btn.textContent = original; }, 1800);
+  }).catch(() => {
+    console.error('Não foi possível copiar automaticamente.');
+  });
+}
+</script>
+</body>
+</html>
