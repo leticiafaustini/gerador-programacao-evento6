@@ -15,9 +15,9 @@ app.post('/api/gerar-programacao', async (req, res) => {
       return res.status(500).json({ error: 'Servidor não configurado: falta a chave de API. Veja o README.md.' });
     }
 
-    const { tema, versiculo, publico, tipo, duracao, formato, lead } = req.body || {};
+    const { tema, versiculo, publico, tipo, duracao, formato, lead, participantes, horaInicio, horaFim } = req.body || {};
 
-    if (!tema || !publico || !tipo || !duracao || !formato) {
+    if (!tema || !versiculo || !publico || !tipo || !duracao || !formato) {
       return res.status(400).json({ error: 'Campos obrigatórios ausentes.' });
     }
 
@@ -26,14 +26,17 @@ app.post('/api/gerar-programacao', async (req, res) => {
       console.log(`[lead] ${lead.nome} <${lead.email}> — ${lead.igreja} — gerou programação: "${tema}"`);
     }
 
+    const temHorarios = horaInicio && horaFim;
+
     const prompt = `Você é um assistente especialista em organizar programações de eventos cristãos (cultos, conferências, retiros).
 Gere uma programação de evento completa com as seguintes características:
 - Tipo de evento: ${tipo}
 - Tema: ${tema}
-- Versículo-base: ${versiculo || 'não informado'}
+- Versículo-base: ${versiculo}
 - Público: ${publico}
-- Duração total: ${duracao}
+- Duração total (referência): ${duracao}
 - Formato: ${formato}
+- Número esperado de participantes: ${participantes || 'não informado'} — leve isso em conta para calibrar dinâmicas e atividades (grupos grandes pedem dinâmicas que funcionem em massa; grupos pequenos permitem algo mais interativo/próximo)
 - Nome da igreja/ministério (para personalizar o kit de divulgação): ${(lead && lead.igreja) || 'não informado'}
 
 Responda APENAS com um JSON válido, sem nenhum texto antes ou depois, sem markdown, no seguinte formato exato:
@@ -64,7 +67,11 @@ Responda APENAS com um JSON válido, sem nenhum texto antes ou depois, sem markd
   ]
 }
 Gere entre 5 e 6 itens no calendario_editorial, cobrindo do início da divulgação até um recap após o evento, em ordem cronológica.
-Comece o horário em 19:00 caso não haja indicação contrária. Distribua os blocos de forma realista para a duração total informada, incluindo abertura e encerramento. Use no máximo 8 blocos.`;
+${temHorarios
+  ? `O evento começa EXATAMENTE às ${horaInicio} e termina EXATAMENTE às ${horaFim}. Distribua os blocos dentro desse intervalo exato, começando o primeiro bloco em ${horaInicio} e terminando o último exatamente em ${horaFim}.`
+  : 'Comece o horário em 19:00 caso não haja indicação contrária.'
+}
+Distribua os blocos de forma realista para a duração total informada, incluindo abertura e encerramento. Use no máximo 8 blocos.`;
 
     const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
